@@ -41,4 +41,33 @@ describe Chef::Knife::Ec2VolumeCreate do
       volume_size.should == 5
     end
   end
+
+  describe ".run" do
+    before do
+      {
+        :aws_access_key_id => 'aws_access_key_id',
+        :aws_secret_access_key => 'aws_secret_access_key'
+      }.each do |key, value|
+        Chef::Config[:knife][key] = value
+      end
+
+      @ec2_connection = double(Fog::Compute::AWS)
+      @knife_volume_create.should_receive(:connection).twice.and_return(@ec2_connection)
+    end
+
+
+    it "passes along the availability and volume size to the create_volume" do
+      Chef::Config[:knife][:availability_zone] = "us-east-1a"
+      Chef::Config[:knife][:volume_size] = 5
+      @knife_volume_create.connection.should_receive(:create_volume).with("us-east-1a", 5).and_return(create_volume_response)
+
+      @knife_volume_create.run
+
+      @knife_volume_create.should_not == nil
+    end
+
+    def create_volume_response
+      double(data: {body: {"availabilityZone" => "us-east-1a", "size" => "5"}})
+    end
+  end
 end
