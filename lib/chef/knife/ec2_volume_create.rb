@@ -54,14 +54,19 @@ class Chef
 
         validate!
 
-        availability_zone = locate_config_value(:availability_zone)
-        volume_size = locate_config_value(:volume_size)
         @volume = connection.create_volume(availability_zone, volume_size)
 
         msg_pair("Availability Zone", @volume.data[:body]["availabilityZone"])
         msg_pair("Volume Size", @volume.data[:body]["size"])
       end
 
+      def volume_size
+        locate_config_value(:volume_size)
+      end
+
+      def availability_zone
+        locate_config_value(:availability_zone)
+      end
 
       def validate!
         super([:aws_access_key_id, :aws_secret_access_key, :availability_zone, :volume_size])
