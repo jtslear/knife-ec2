@@ -52,54 +52,15 @@ class Chef
 
         validate!
 
-        @server = connection.servers.create_volume('us-east-1a', 5)
+        @volume = connection.create_volume('us-east-1a', 5)
 
-        msg_pair("Availability Zone", @server.availability_zone)
-
-        print "\n#{ui.color("Waiting for instance", :magenta)}"
-
-        # wait for instance to come up before acting against it
-        @server.wait_for { print "."; ready? }
-
-        puts("\n")
-# 
-#         # occasionally 'ready?' isn't, so retry a couple times if needed.
-#         tries = 6
-#         begin
-#           create_tags(hashed_tags) unless hashed_tags.empty?
-#           associate_eip(elastic_ip) if config[:associate_eip]
-#         rescue Fog::Compute::AWS::NotFound, Fog::Errors::Error
-#           raise if (tries -= 1) <= 0
-#           ui.warn("server not ready, retrying tag application (retries left: #{tries})")
-#           sleep 5
-#           retry
-#         end
-# 
-#         if vpc_mode?
-#           msg_pair("Subnet ID", @server.subnet_id)
-#           msg_pair("Tenancy", @server.tenancy)
-#           if config[:associate_public_ip]
-#             msg_pair("Public DNS Name", @server.dns_name)
-#           end
-#           if elastic_ip
-#             msg_pair("Public IP Address", @server.public_ip_address)
-#           end
-#         else
-#           msg_pair("Public DNS Name", @server.dns_name)
-#           msg_pair("Public IP Address", @server.public_ip_address)
-#           msg_pair("Private DNS Name", @server.private_dns_name)
-#         end
-#         msg_pair("Private IP Address", @server.private_ip_address)
-# 
-        #
-
-        msg_pair("Availability Zone", @server.availability_zone)
-        msg_pair("Private IP Address", @server.private_ip_address)
+        msg_pair("Availability Zone", @volume.data[:body]["availabilityZone"])
+        puts "Done"
       end
 
 
       def validate!
-        super([:aws_ssh_key_id, :aws_access_key_id, :aws_secret_access_key])
+        super([:aws_access_key_id, :aws_secret_access_key])
       end
     end
   end
