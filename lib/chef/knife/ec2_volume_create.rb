@@ -18,6 +18,7 @@
 #
 
 require 'chef/knife/ec2_base'
+require 'chef/knife/ec2_volume_base'
 require 'chef/knife/winrm_base'
 
 class Chef
@@ -25,6 +26,7 @@ class Chef
     class Ec2VolumeCreate < Knife
 
       include Knife::Ec2Base
+      include Knife::Ec2VolumeBase
       deps do
         require 'fog'
         require 'readline'
@@ -35,38 +37,17 @@ class Chef
 
       banner "knife ec2 volume create (options)"
 
-      attr_reader :volume
-
-      option :availability_zone,
-        :short => "-Z ZONE",
-        :long => "--availability-zone ZONE",
-        :description => "The Availability Zone",
-        :proc => Proc.new { |key| Chef::Config[:knife][:availability_zone] = key }
-
-      option :volume_size,
-        :short => "-s",
-        :long => "--size SIZE",
-        :description => "The size of the EBS volume in GB",
-        :proc => Proc.new { |size| Chef::Config[:knife][:volume_size] = size }
+      attr_reader :volumes
 
       def run
         $stdout.sync = true
 
         validate!
+        create_volumes!
 
-        @volume = connection.create_volume(availability_zone, volume_size)
-
-        msg_pair("Availability Zone", @volume.data[:body]["availabilityZone"])
-        msg_pair("Volume Size", @volume.data[:body]["size"])
       end
 
-      def volume_size
-        locate_config_value(:volume_size)
-      end
 
-      def availability_zone
-        locate_config_value(:availability_zone)
-      end
 
       def validate!
         super([:aws_access_key_id, :aws_secret_access_key, :availability_zone, :volume_size])
